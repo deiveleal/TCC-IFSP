@@ -1,0 +1,2 @@
+ /api/estatisticas?tipoLocal=EST&nomeLocal=SP&codMunicipio=0&indice=0 
+
