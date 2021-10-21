@@ -490,20 +490,150 @@
       </attribute>
     </attributes>
   </connection>
+  <connection>
+    <name>hive_gold_zone</name>
+    <server>localhost</server>
+    <type>HIVEWAREHOUSE</type>
+    <access>Native</access>
+    <database>gold_zone</database>
+    <port>10000</port>
+    <username>root</username>
+    <password>Encrypted 2be98afc86aa7f2d5f94afa2588c5f783</password>
+    <servername/>
+    <data_tablespace/>
+    <index_tablespace/>
+    <attributes>
+      <attribute>
+        <code>FORCE_IDENTIFIERS_TO_LOWERCASE</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>FORCE_IDENTIFIERS_TO_UPPERCASE</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>IS_CLUSTERED</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>NAMED_CLUSTER_ID</code>
+        <attribute>datalab</attribute>
+      </attribute>
+      <attribute>
+        <code>PORT_NUMBER</code>
+        <attribute>10000</attribute>
+      </attribute>
+      <attribute>
+        <code>PRESERVE_RESERVED_WORD_CASE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>QUOTE_ALL_FIELDS</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>SUPPORTS_BOOLEAN_DATA_TYPE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>SUPPORTS_TIMESTAMP_DATA_TYPE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>USE_POOLING</code>
+        <attribute>N</attribute>
+      </attribute>
+    </attributes>
+  </connection>
+  <connection>
+    <name>hive_silver_zone</name>
+    <server>localhost</server>
+    <type>HIVEWAREHOUSE</type>
+    <access>Native</access>
+    <database>silver_zone</database>
+    <port>10000</port>
+    <username>root</username>
+    <password>Encrypted 2be98afc86aa7f2d5f94afa2588c5f783</password>
+    <servername/>
+    <data_tablespace/>
+    <index_tablespace/>
+    <attributes>
+      <attribute>
+        <code>FORCE_IDENTIFIERS_TO_LOWERCASE</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>FORCE_IDENTIFIERS_TO_UPPERCASE</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>IS_CLUSTERED</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>NAMED_CLUSTER_ID</code>
+        <attribute>datalab</attribute>
+      </attribute>
+      <attribute>
+        <code>PORT_NUMBER</code>
+        <attribute>10000</attribute>
+      </attribute>
+      <attribute>
+        <code>PRESERVE_RESERVED_WORD_CASE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>QUOTE_ALL_FIELDS</code>
+        <attribute>N</attribute>
+      </attribute>
+      <attribute>
+        <code>SUPPORTS_BOOLEAN_DATA_TYPE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>SUPPORTS_TIMESTAMP_DATA_TYPE</code>
+        <attribute>Y</attribute>
+      </attribute>
+      <attribute>
+        <code>USE_POOLING</code>
+        <attribute>N</attribute>
+      </attribute>
+    </attributes>
+  </connection>
   <order>
     <hop>
-      <from>hive_bronze_read</from>
-      <to>Strings cut</to>
-      <enabled>N</enabled>
+      <from>hive_silver_r_csv_turm</from>
+      <to>sort_cod_mun</to>
+      <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Strings cut</from>
-      <to>Select values</to>
-      <enabled>N</enabled>
+      <from>hive_silver_r_mun_lat_long</from>
+      <to>sort_ibge_cod</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>sort_ibge_cod</from>
+      <to>merge_join</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>sort_cod_mun</from>
+      <to>merge_join</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>merge_join</from>
+      <to>select_merge_values</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>select_merge_values</from>
+      <to>hive_gold_w_csv_turm_plus_bd_lat_long</to>
+      <enabled>Y</enabled>
     </hop>
   </order>
   <step>
-    <name>hive_bronze_read</name>
+    <name>hive_silver_r_mun_lat_long</name>
     <type>TableInput</type>
     <description/>
     <distribute>Y</distribute>
@@ -515,18 +645,16 @@
     </partitioning>
     <connection>hive_bronze_zone</connection>
     <sql>SELECT
-  tb_bronze_pentaho_api_vaccine_campaign.paciente_endereco_uf
-, tb_bronze_pentaho_api_vaccine_campaign.paciente_endereco_nmmunicipio
-, tb_bronze_pentaho_api_vaccine_campaign.paciente_racacor_valor
-, tb_bronze_pentaho_api_vaccine_campaign.vacina_dataaplicacao
-, tb_bronze_pentaho_api_vaccine_campaign.paciente_datanascimento
-, tb_bronze_pentaho_api_vaccine_campaign.paciente_idade
-, tb_bronze_pentaho_api_vaccine_campaign.vacina_nome
-, tb_bronze_pentaho_api_vaccine_campaign.vacina_descricao_dose
-, tb_bronze_pentaho_api_vaccine_campaign.estabelecimento_uf
-, tb_bronze_pentaho_api_vaccine_campaign.vacina_categoria_nome
-, tb_bronze_pentaho_api_vaccine_campaign.estabelecimento_municipio_nome
-FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
+  municipios_br_latitude_longitude.cod_uf
+, municipios_br_latitude_longitude.uf
+, municipios_br_latitude_longitude.sigla_uf
+, municipios_br_latitude_longitude.cod_ibge
+, municipios_br_latitude_longitude.nome_municipio
+, municipios_br_latitude_longitude.cod_latitude
+, municipios_br_latitude_longitude.cod_longitude
+, municipios_br_latitude_longitude.sigla_regiao
+, municipios_br_latitude_longitude.regiao
+FROM bronze_zone.municipios_br_latitude_longitude
 </sql>
     <limit>0</limit>
     <lookup/>
@@ -538,11 +666,11 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.paciente_endereco_uf</name>
+        <name>municipios_br_latitude_longitude.cod_uf</name>
         <length>2147483647</length>
         <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.paciente_endereco_uf</comments>
+        <origin>Table input</origin>
+        <comments>municipios_br_latitude_longitude.cod_uf</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol>.</grouping_symbol>
@@ -561,11 +689,11 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.paciente_endereco_nmmunicipio</name>
+        <name>municipios_br_latitude_longitude.uf</name>
         <length>2147483647</length>
         <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.paciente_endereco_nmmunicipio</comments>
+        <origin>Table input</origin>
+        <comments>municipios_br_latitude_longitude.uf</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol>.</grouping_symbol>
@@ -584,11 +712,11 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.paciente_racacor_valor</name>
+        <name>municipios_br_latitude_longitude.sigla_uf</name>
         <length>2147483647</length>
         <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.paciente_racacor_valor</comments>
+        <origin>Table input</origin>
+        <comments>municipios_br_latitude_longitude.sigla_uf</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol>.</grouping_symbol>
@@ -607,11 +735,11 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.vacina_dataaplicacao</name>
+        <name>municipios_br_latitude_longitude.cod_ibge</name>
         <length>2147483647</length>
         <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.vacina_dataaplicacao</comments>
+        <origin>Table input</origin>
+        <comments>municipios_br_latitude_longitude.cod_ibge</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol>.</grouping_symbol>
@@ -630,11 +758,11 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.paciente_datanascimento</name>
+        <name>municipios_br_latitude_longitude.nome_municipio</name>
         <length>2147483647</length>
         <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.paciente_datanascimento</comments>
+        <origin>Table input</origin>
+        <comments>municipios_br_latitude_longitude.nome_municipio</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol>.</grouping_symbol>
@@ -653,11 +781,11 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.paciente_idade</name>
+        <name>municipios_br_latitude_longitude.cod_latitude</name>
         <length>2147483647</length>
         <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.paciente_idade</comments>
+        <origin>Table input</origin>
+        <comments>municipios_br_latitude_longitude.cod_latitude</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol>.</grouping_symbol>
@@ -676,11 +804,11 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.vacina_nome</name>
+        <name>municipios_br_latitude_longitude.cod_longitude</name>
         <length>2147483647</length>
         <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.vacina_nome</comments>
+        <origin>Table input</origin>
+        <comments>municipios_br_latitude_longitude.cod_longitude</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol>.</grouping_symbol>
@@ -699,11 +827,11 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.vacina_descricao_dose</name>
+        <name>municipios_br_latitude_longitude.sigla_regiao</name>
         <length>2147483647</length>
         <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.vacina_descricao_dose</comments>
+        <origin>Table input</origin>
+        <comments>municipios_br_latitude_longitude.sigla_regiao</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol>.</grouping_symbol>
@@ -722,57 +850,11 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.estabelecimento_uf</name>
+        <name>municipios_br_latitude_longitude.regiao</name>
         <length>2147483647</length>
         <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.estabelecimento_uf</comments>
-        <conversion_Mask/>
-        <decimal_symbol>,</decimal_symbol>
-        <grouping_symbol>.</grouping_symbol>
-        <currency_symbol/>
-        <trim_type>none</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale>pt_BR</date_format_locale>
-        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
-      <value-meta>
-        <type>String</type>
-        <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.vacina_categoria_nome</name>
-        <length>2147483647</length>
-        <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.vacina_categoria_nome</comments>
-        <conversion_Mask/>
-        <decimal_symbol>,</decimal_symbol>
-        <grouping_symbol>.</grouping_symbol>
-        <currency_symbol/>
-        <trim_type>none</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale>pt_BR</date_format_locale>
-        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
-      <value-meta>
-        <type>String</type>
-        <storagetype>normal</storagetype>
-        <name>tb_bronze_pentaho_api_vaccine_campaign.estabelecimento_municipio_nome</name>
-        <length>2147483647</length>
-        <precision>-1</precision>
-        <origin>hive_bronze_read</origin>
-        <comments>tb_bronze_pentaho_api_vaccine_campaign.estabelecimento_municipio_nome</comments>
+        <origin>Table input</origin>
+        <comments>municipios_br_latitude_longitude.regiao</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol>.</grouping_symbol>
@@ -798,14 +880,14 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       </output>
     </remotesteps>
     <GUI>
-      <xloc>352</xloc>
-      <yloc>224</yloc>
+      <xloc>288</xloc>
+      <yloc>80</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>Select values</name>
-    <type>SelectValues</type>
+    <name>hive_silver_r_csv_turm</name>
+    <type>TableInput</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -814,9 +896,355 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <fields>
-      <select_unspecified>N</select_unspecified>
-    </fields>
+    <connection>hive_silver_zone</connection>
+    <sql>SELECT
+  tb_silver_pentaho_csv_turmas.pk_cod_turma
+, tb_silver_pentaho_csv_turmas.no_turma
+, tb_silver_pentaho_csv_turmas.num_matriculas
+, tb_silver_pentaho_csv_turmas.id_historia
+, tb_silver_pentaho_csv_turmas.id_geografia
+, tb_silver_pentaho_csv_turmas.id_filosofia
+, tb_silver_pentaho_csv_turmas.id_ensino_religioso
+, tb_silver_pentaho_csv_turmas.id_estudos_sociais
+, tb_silver_pentaho_csv_turmas.id_sociologia
+, tb_silver_pentaho_csv_turmas.id_informatica_computacao
+, tb_silver_pentaho_csv_turmas.cod_estado
+, tb_silver_pentaho_csv_turmas.cod_municipio
+, tb_silver_pentaho_csv_turmas.educacao_indigena
+, tb_silver_pentaho_csv_turmas.ano_censo
+FROM silver_zone.tb_silver_pentaho_csv_turmas
+limit 21
+</sql>
+    <limit>0</limit>
+    <lookup/>
+    <execute_each_row>N</execute_each_row>
+    <variables_active>N</variables_active>
+    <lazy_conversion_active>N</lazy_conversion_active>
+    <cached_row_meta_active>N</cached_row_meta_active>
+    <row-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.pk_cod_turma</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.pk_cod_turma</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.no_turma</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.no_turma</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.num_matriculas</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.num_matriculas</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.id_historia</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.id_historia</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.id_geografia</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.id_geografia</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.id_filosofia</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.id_filosofia</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.id_ensino_religioso</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.id_ensino_religioso</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.id_estudos_sociais</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.id_estudos_sociais</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.id_sociologia</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.id_sociologia</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.id_informatica_computacao</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.id_informatica_computacao</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.cod_estado</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.cod_estado</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.cod_municipio</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.cod_municipio</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.educacao_indigena</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.educacao_indigena</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>tb_silver_pentaho_csv_turmas.ano_censo</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>hive_silver_r_csv_turm</origin>
+        <comments>tb_silver_pentaho_csv_turmas.ano_censo</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol>.</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>pt_BR</date_format_locale>
+        <date_format_timezone>America/Sao_Paulo</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+    </row-meta>
     <attributes/>
     <cluster_schema/>
     <remotesteps>
@@ -826,13 +1254,13 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       </output>
     </remotesteps>
     <GUI>
-      <xloc>656</xloc>
+      <xloc>288</xloc>
       <yloc>224</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>hive_silver_w</name>
+    <name>hive_gold_w_csv_turm_plus_bd_lat_long</name>
     <type>TableOutput</type>
     <description/>
     <distribute>Y</distribute>
@@ -842,10 +1270,10 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection/>
-    <schema/>
-    <table>tb_silver_pentaho_mun_br_lat_long</table>
-    <commit>10000</commit>
+    <connection>hive_gold_zone</connection>
+    <schema>gold_zone</schema>
+    <table>tb_gold_csv_turm_add_bd_lat_long</table>
+    <commit>1000</commit>
     <truncate>N</truncate>
     <ignore_errors>N</ignore_errors>
     <use_batch>Y</use_batch>
@@ -861,36 +1289,68 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
     <return_field/>
     <fields>
       <field>
-        <column_name>tb_silver_pentaho_mun_br_lat_long.uf</column_name>
-        <stream_name>municipios_br_latitude_longitude.uf</stream_name>
+        <column_name>num_matriculas</column_name>
+        <stream_name>num_matriculas</stream_name>
       </field>
       <field>
-        <column_name>tb_silver_pentaho_mun_br_lat_long.sigla_uf</column_name>
-        <stream_name>municipios_br_latitude_longitude.sigla_uf</stream_name>
+        <column_name>id_historia</column_name>
+        <stream_name>id_historia</stream_name>
       </field>
       <field>
-        <column_name>tb_silver_pentaho_mun_br_lat_long.cod_ibge</column_name>
-        <stream_name>municipios_br_latitude_longitude.cod_ibge</stream_name>
+        <column_name>id_geografia</column_name>
+        <stream_name>id_geografia</stream_name>
       </field>
       <field>
-        <column_name>tb_silver_pentaho_mun_br_lat_long.nome_municipio</column_name>
-        <stream_name>municipios_br_latitude_longitude.nome_municipio</stream_name>
+        <column_name>id_filosofia</column_name>
+        <stream_name>id_filosofia</stream_name>
       </field>
       <field>
-        <column_name>tb_silver_pentaho_mun_br_lat_long.cod_latitude</column_name>
-        <stream_name>municipios_br_latitude_longitude.cod_latitude</stream_name>
+        <column_name>id_ensino_religioso</column_name>
+        <stream_name>id_ensino_religioso</stream_name>
       </field>
       <field>
-        <column_name>tb_silver_pentaho_mun_br_lat_long.cod_longitude</column_name>
-        <stream_name>municipios_br_latitude_longitude.cod_longitude</stream_name>
+        <column_name>id_estudos_sociais</column_name>
+        <stream_name>id_estudos_sociais</stream_name>
       </field>
       <field>
-        <column_name>tb_silver_pentaho_mun_br_lat_long.sigla_regiao</column_name>
-        <stream_name>municipios_br_latitude_longitude.sigla_regiao</stream_name>
+        <column_name>id_sociologia</column_name>
+        <stream_name>id_sociologia</stream_name>
       </field>
       <field>
-        <column_name>tb_silver_pentaho_mun_br_lat_long.regiao</column_name>
-        <stream_name>municipios_br_latitude_longitude.regiao</stream_name>
+        <column_name>id_informatica_computacao</column_name>
+        <stream_name>id_informatica_computacao</stream_name>
+      </field>
+      <field>
+        <column_name>educacao_indigena</column_name>
+        <stream_name>educacao_indigena</stream_name>
+      </field>
+      <field>
+        <column_name>cod_uf</column_name>
+        <stream_name>cod_uf</stream_name>
+      </field>
+      <field>
+        <column_name>sigla_uf</column_name>
+        <stream_name>sigla_uf</stream_name>
+      </field>
+      <field>
+        <column_name>nome_municipio</column_name>
+        <stream_name>nome_municipio</stream_name>
+      </field>
+      <field>
+        <column_name>cod_latitude</column_name>
+        <stream_name>cod_latitude</stream_name>
+      </field>
+      <field>
+        <column_name>cod_longitude</column_name>
+        <stream_name>cod_longitude</stream_name>
+      </field>
+      <field>
+        <column_name>sigla_regiao</column_name>
+        <stream_name>sigla_regiao</stream_name>
+      </field>
+      <field>
+        <column_name>ano_censo</column_name>
+        <stream_name>ano_censo</stream_name>
       </field>
     </fields>
     <attributes/>
@@ -902,14 +1362,132 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       </output>
     </remotesteps>
     <GUI>
-      <xloc>784</xloc>
-      <yloc>208</yloc>
+      <xloc>1088</xloc>
+      <yloc>160</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>Strings cut</name>
-    <type>StringCut</type>
+    <name>sort_ibge_cod</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <directory>%%java.io.tmpdir%%</directory>
+    <prefix>out</prefix>
+    <sort_size>1000000</sort_size>
+    <free_memory/>
+    <compress>N</compress>
+    <compress_variable/>
+    <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>municipios_br_latitude_longitude.cod_ibge</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+        <collator_enabled>N</collator_enabled>
+        <collator_strength>0</collator_strength>
+        <presorted>N</presorted>
+      </field>
+    </fields>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>512</xloc>
+      <yloc>80</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>sort_cod_mun</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <directory>%%java.io.tmpdir%%</directory>
+    <prefix>out</prefix>
+    <sort_size>1000000</sort_size>
+    <free_memory/>
+    <compress>N</compress>
+    <compress_variable/>
+    <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>tb_silver_pentaho_csv_turmas.cod_municipio</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+        <collator_enabled>N</collator_enabled>
+        <collator_strength>0</collator_strength>
+        <presorted>N</presorted>
+      </field>
+    </fields>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>512</xloc>
+      <yloc>224</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>merge_join</name>
+    <type>MergeJoin</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <join_type>INNER</join_type>
+    <step1>sort_cod_mun</step1>
+    <step2>sort_ibge_cod</step2>
+    <keys_1>
+      <key>tb_silver_pentaho_csv_turmas.cod_municipio</key>
+    </keys_1>
+    <keys_2>
+      <key>municipios_br_latitude_longitude.cod_ibge</key>
+    </keys_2>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>656</xloc>
+      <yloc>160</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>select_merge_values</name>
+    <type>SelectValues</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -920,11 +1498,70 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
     </partitioning>
     <fields>
       <field>
-        <in_stream_name>tb_bronze_pentaho_api_vaccine_campaign.vacina_dataaplicacao</in_stream_name>
-        <out_stream_name/>
-        <cut_from>1</cut_from>
-        <cut_to>10</cut_to>
+        <name>tb_silver_pentaho_csv_turmas.num_matriculas</name>
+        <rename>num_matriculas</rename>
       </field>
+      <field>
+        <name>tb_silver_pentaho_csv_turmas.id_historia</name>
+        <rename>id_historia</rename>
+      </field>
+      <field>
+        <name>tb_silver_pentaho_csv_turmas.id_geografia</name>
+        <rename>id_geografia</rename>
+      </field>
+      <field>
+        <name>tb_silver_pentaho_csv_turmas.id_filosofia</name>
+        <rename>id_filosofia</rename>
+      </field>
+      <field>
+        <name>tb_silver_pentaho_csv_turmas.id_ensino_religioso</name>
+        <rename>id_ensino_religioso</rename>
+      </field>
+      <field>
+        <name>tb_silver_pentaho_csv_turmas.id_estudos_sociais</name>
+        <rename>id_estudos_sociais</rename>
+      </field>
+      <field>
+        <name>tb_silver_pentaho_csv_turmas.id_sociologia</name>
+        <rename>id_sociologia</rename>
+      </field>
+      <field>
+        <name>tb_silver_pentaho_csv_turmas.id_informatica_computacao</name>
+        <rename>id_informatica_computacao</rename>
+      </field>
+      <field>
+        <name>tb_silver_pentaho_csv_turmas.educacao_indigena</name>
+        <rename>educacao_indigena</rename>
+      </field>
+      <field>
+        <name>municipios_br_latitude_longitude.cod_uf</name>
+        <rename>cod_uf</rename>
+      </field>
+      <field>
+        <name>municipios_br_latitude_longitude.sigla_uf</name>
+        <rename>sigla_uf</rename>
+      </field>
+      <field>
+        <name>municipios_br_latitude_longitude.nome_municipio</name>
+        <rename>nome_municipio</rename>
+      </field>
+      <field>
+        <name>municipios_br_latitude_longitude.cod_latitude</name>
+        <rename>cod_latitude</rename>
+      </field>
+      <field>
+        <name>municipios_br_latitude_longitude.cod_longitude</name>
+        <rename>cod_longitude</rename>
+      </field>
+      <field>
+        <name>municipios_br_latitude_longitude.sigla_regiao</name>
+        <rename>sigla_regiao</rename>
+      </field>
+      <field>
+        <name>tb_silver_pentaho_csv_turmas.ano_censo</name>
+        <rename>ano_censo</rename>
+      </field>
+      <select_unspecified>N</select_unspecified>
     </fields>
     <attributes/>
     <cluster_schema/>
@@ -935,8 +1572,8 @@ FROM bronze_zone.tb_bronze_pentaho_api_vaccine_campaign
       </output>
     </remotesteps>
     <GUI>
-      <xloc>496</xloc>
-      <yloc>224</yloc>
+      <xloc>880</xloc>
+      <yloc>160</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
